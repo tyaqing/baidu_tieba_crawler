@@ -1,0 +1,22 @@
+{
+  "name": "lesson4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "cheerio": "^0.22.0",
+    "eventproxy": "^0.3.5",
+    "express": "^4.14.0",
+    "fs": "0.0.1-security",
+    "jquery": "^3.1.1",
+    "mongoose": "^4.6.6",
+    "socket.io": "^1.5.1",
+    "superagent": "^2.2.0"
+  }
+}

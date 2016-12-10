@@ -1,0 +1,211 @@
+html {
+  //font-size: 20px;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+@media only screen and (min-width: 400px) {
+  html {
+    font-size: 21.33333333px !important;
+  }
+}
+@media only screen and (min-width: 414px) {
+  html {
+    font-size: 22.08px !important;
+  }
+}
+@media only screen and (min-width: 480px) {
+  html {
+    font-size: 25.6px !important;
+  }
+}
+//颜色类
+
+@red: #FF4949;
+@yellow:#F7BA2A;
+@blue:#20A0FF;
+@green:#13CE66;
+@grey:#F9FAFC;
+
+.c-1{
+  color: #1F2D3D;
+}
+.c-2{
+  color: #324057;
+}
+.c-3{
+  color:#475669;
+}
+.c-4{
+  color:#8492A6;
+}
+.c-f{
+  color: #fff;
+}
+
+.c-yellow{
+  color: @yellow;
+}
+.c-red{
+  color:@red;
+}
+.c-blue{
+  color: @blue;
+}
+.c-green{
+  color: @green;
+}
+
+//背景颜色
+.bg-0{
+  background-color: #fff;
+}
+.bg-grey{
+  background-color: @grey;
+}
+
+
+//文字大小类
+.f-10{
+  font-size: .5rem;
+}
+.f-12{
+  font-size: .6rem;
+}
+.f-14{
+  font-size: .7rem;
+}
+.f-16{
+  font-size: .8rem;
+}
+.f-18{
+  font-size: .9rem;
+}
+.f-20{
+  font-size: 1rem;
+}
+//文本类
+.t-center{
+  text-align: center;
+}
+//单行显示
+.t-only{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.border-l{
+  border-left: .5px solid #eee;
+}
+.border-r{
+  border-right: .5px solid #eee;
+}
+.border-t{
+  border-top: .5px solid #eee;
+}
+//Margin
+.pd-2{
+  margin-top:.1rem;
+}
+.mt-4{
+  margin-top:.2rem;
+}
+.mt-6{
+  margin-top:.3rem;
+}
+.mt-8{
+  margin-top:.4rem;
+}
+.mt-10{
+  margin-top:.5rem;
+}
+.mt-12{
+  margin-top:.6rem;
+}
+.mt-16{
+  margin-top:.75rem;
+}
+.mt-18{
+  margin-top:.75rem;
+}
+.mt-20{
+  margin-top:1rem;
+}
+.mt-22{
+  margin-top: 1.1rem;
+}
+.mb-20{
+  margin-bottom: 1rem !important;
+}
+
+.margin-clear{
+  margin: 0;
+}
+
+.block{
+  display: block;
+}
+//padding
+
+//Margin
+.pd-2{
+  padding:.1rem;
+}
+.pd-4{
+  padding:.2rem;
+}
+.pd-6{
+  padding:.3rem;
+}
+.pd-8{
+  padding:.4rem;
+}
+.pd-10{
+  padding:.5rem;
+}
+.pd-12{
+  padding:.6rem;
+}
+.pd-14{
+  padding:.7rem;
+}
+.pd-16{
+  padding:.75rem;
+}
+.pd-18{
+  padding:.75rem;
+}
+.pd-20{
+  padding:1rem;
+}
+.pd-22{
+  padding: 1.1rem;
+}
+
+
+.clearfix:before,
+.clearfix:after{
+  content:"";
+  display:table;
+}
+.clearfix:after{clear:both;}
+.clearfix{
+  *zoom:1;
+}
+
+.box{
+  box-shadow: 0 1px 3px 0 #D4D4D5,0 0 0 1px #D4D4D5;
+  background-color: #fff;
+}
+.left{
+  float: left;
+}
+.right{
+  float: right;
+}
+.center{
+  margin: 0 auto;
+}
+
+@import 'container';
+@import "style";
