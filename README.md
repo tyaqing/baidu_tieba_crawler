@@ -4,7 +4,9 @@
 ！！！爬虫类的东东还是友善使用
 ##先说下目录结构
 ```
-├─server             运行socket 和 api的服务端代码
+├─model              mongooes 模型  Scheme
+│  ├─model.js        定义了数据库模型 
+├─server             运行socket 和 api的服务端代码
 │  ├─api.js          express路由生成的 restful api
 │  ├─api_action.js   api.js 会调用我的函数 
 │  ├─cp.js           socket.js会通过child_process调用我 我只运行在子进程里
