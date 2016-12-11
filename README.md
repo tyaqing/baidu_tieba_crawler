@@ -1,9 +1,15 @@
 # baidu_tieba_crawler
+##演示地址
 
+http://www.femirror.com/index
+服务器很慢，请原谅
+##项目地址
+https://github.com/tyaqing/baidu_tieba_crawler
+喜欢的给个star
 #使用说明书
 ！！！爬虫类的东东还是友善使用
 ### 程序运行不起来就要检查下 以下接口是否替换
-~ 代理的api接口  mongo地址 socket地址
+~ 代理的api接口  mongo地址 socket地址 ~
 ##先说下目录结构
 ```
 ├─model              mongooes 模型  Scheme
