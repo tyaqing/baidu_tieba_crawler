@@ -4,13 +4,8 @@
             <el-menu router theme="dark" default-active="1" class="el-menu-demo ui container text" mode="horizontal"
                      @select="handleSelect">
                 <el-menu-item index="/index">主页</el-menu-item>
-                <el-submenu index="2">
-                    <template slot="title">我的工作台</template>
-                    <el-menu-item index="/index">Hom</el-menu-item>
-                    <el-menu-item index="/index/dashboard">选项2</el-menu-item>
-                    <el-menu-item index="/2-3">选项3</el-menu-item>
-                </el-submenu>
-                <el-menu-item index="3">订单管理</el-menu-item>
+
+                <el-menu-item ><a target="_blank" href="https://github.com/tyaqing/baidu_tieba_crawler">Github</a></el-menu-item>
             </el-menu>
         </div>
 
