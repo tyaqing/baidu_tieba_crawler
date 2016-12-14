@@ -1,8 +1,11 @@
 # baidu_tieba_crawler
-##演示地址
-
-http://www.femirror.com/index
+##[演示地址](http://www.femirror.com/index)
 服务器很慢，请原谅
+##1.1更新说明
+* 依托socket实现一页面一进程
+* 改写入口文件，精简代码，提高了爬虫效率
+* 消灭了停止爬取会出现崩溃的bug
+
 ##项目地址
 https://github.com/tyaqing/baidu_tieba_crawler
 喜欢的给个star
@@ -34,3 +37,4 @@ vue大礼包(vue-resource vue-router vue-socket.id element-ui)
 express socket.io superagent cheerio mongoose
 ####数据库
 mongo
+
