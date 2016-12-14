@@ -117,6 +117,11 @@
             },
             close(){
                 this.$socket.emit('close',this.kw);
+                this.$http.get(`/api/p?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
+                        .then(function(res){
+                            this.tableData = res.body.data;
+                            this.count = res.body.count;
+                        })
             }
 
         },

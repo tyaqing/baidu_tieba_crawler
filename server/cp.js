@@ -35,6 +35,7 @@ process.on('message', (m) => {
             db.Tieba.findOne({kw: kw}, function (err, res) {
                 if (err) return console.log(err);
                 let fid = res._id;
+                process.send({type: 'msg', data: '正在获取帖子内容'});
                 get_all_content(m.data, fid);
             });
         });
@@ -98,7 +99,7 @@ function get_list(base_url) {
                     get_list(refresh_url());
                 } else {
                     console.log('抓取结束');
-                    process.send({type: 'msg', data: 'close'});
+                    process.send({type: 'close', data: 'close'});
                 }
             })
         })
@@ -209,7 +210,8 @@ function get_all_content(_post_id, _fid) {
                         db.Post.findOneAndUpdate({_id: res._id}, {$set: {postlist: res.postlist}}, function (err, docs) {
                             // console.log(err,docs);
                             if (err) return console.log(err);
-                            process.send({type: 'success', data: '爬取成功'});
+                            process.send({type: 'get_content', data: '爬取成功'});
+                            process.send({type: 'close', data: 'close'});
                         })
 
                     }

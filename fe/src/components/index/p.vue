@@ -48,7 +48,6 @@
             this.$http.get(`/api/p/${this.id}`)
                     .then((res) => {
                         this.doc = res.body;
-
                     })
         },
         data(){
@@ -78,6 +77,15 @@
                 value = value.toString()
                 return value.charAt(0).toUpperCase() + value.slice(1)
             }
-        }
+        },
+        sockets:{
+            get_content:function(data){
+                console.log(data);
+                this.$http.get(`/api/p/${this.id}`)
+                        .then((res) => {
+                            this.doc = res.body;
+                        })
+            }
+        },
     }
 </script>

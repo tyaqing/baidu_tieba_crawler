@@ -42,15 +42,18 @@ io.on('connection', function (socket) {
         socket.worker.on("message", function (data) {
             // {type: 'msg', data: 'close'}
             console.log('cp message : ', data);
+
             if(data.type=='msg'){
                 socket.emit('info', data.data);
             }else if (data.type == "now_num") {
                 socket.emit('now_num', data.data);
             }else if (data.type == "total") {
                 socket.emit('total', data.data);
-            }else if (data.data == 'close') {
+            }else if (data.type == 'close') {
                 socket.worker.kill();
                 socket.emit('success', '爬取结束');
+            }else if(data.type=='get_content'){
+                socket.emit('get_content','success');
             }
         });
         socket.worker.on("close", function (code, signal) {
@@ -79,6 +82,8 @@ io.on('connection', function (socket) {
             return;
         }
         socket.worker = cp.fork('./server/cp.js');
+        worker_on();
+        worker_sum++;
         socket.worker.send({order: 'get_tieba_content', data: res});
     });
     //请求停止
