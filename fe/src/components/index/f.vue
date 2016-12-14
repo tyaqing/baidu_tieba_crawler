@@ -113,36 +113,22 @@
             start(){
                 // 爬贴内内容
                 console.log(this.kw)
-                this.$socket.emit('Client_order',{order:'get_tieba_list',data:this.kw})
+                this.$socket.emit('get_tieba_list',this.kw);
             },
             close(){
-                this.$socket.emit('Client_order',{order:'close',data:this.kw})
+                this.$socket.emit('close',this.kw);
             }
 
         },
         sockets:{
-            connect:function(){
-                console.log('socket链接成功');
+            now_num: function (data) {
+                console.log(data);
+                if (data == 0) return;
+                this.process = parseInt(data / this.process_total * 100);
             },
-            news:function(res){
-                console.log(res)
-                let type = res.type;
-                let data  =res.data;
-                if(type=='msg'){
-                    this.$notify({
-                        title: '提示',
-                        message: data,
-                        duration: 2000
-                    });
-
-                }else if(type=='now_num'){
-                    if(data==0) return;
-                    this.process =    parseInt(data /this.process_total *100);
-
-                }else if(type=='total'){
-                    this.process_total = parseInt(data);
-                }
-
+            total  : function (data) {
+                console.log(data);
+                this.process_total = parseInt(data);
             }
         }
     }

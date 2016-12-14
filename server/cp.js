@@ -44,12 +44,6 @@ process.on('message', (m) => {
 
 
 // 获得贴吧列表
-exports.tieba_list = function (_kw, cb) {
-    db.Tieba.find(function (err, docs) {
-        cb(docs);
-    })
-};
-
 exports.get_list = function (_kw) {
     db.Tieba.findOne({kw: `${_kw}`}, function (err, doc) {
         //获取贴吧页数
@@ -100,7 +94,6 @@ function get_list(base_url) {
             db.Post.create(topicUrls, function (err, res) {
                 // if (err) console.log('有错误或者重复信息');
                 if (pn < pn_sum) {
-                    console.log(pn);
                     pn = pn + 50;
                     get_list(refresh_url());
                 } else {
@@ -116,7 +109,6 @@ function get_all_content(_post_id, _fid) {
     // 获取所有帖子内容
     // this.post_url = post_url
     let post_url = `http://tieba.baidu.com/p/${_post_id}`;
-    console.log('-------正在爬第' + page + '页-------');
     superagent
         .get(post_url)
         .query('pn=' + (page++))
@@ -217,8 +209,6 @@ function get_all_content(_post_id, _fid) {
                         db.Post.findOneAndUpdate({_id: res._id}, {$set: {postlist: res.postlist}}, function (err, docs) {
                             // console.log(err,docs);
                             if (err) return console.log(err);
-                            console.log('爬取完成');
-                            process.send({type: 'msg', data: '爬取完成'});
                             process.send({type: 'success', data: '爬取成功'});
                         })
 
