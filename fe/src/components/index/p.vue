@@ -66,35 +66,10 @@
                 console.log(`当前页: ${val}`);
             },
             getContent(){
-                this.$socket.emit('Client_order', {order: 'get_tieba_content', data: this.id});
+                this.$socket.emit('get_tieba_content', this.id);
             },
             showattip(){},
             hideattip(){},
-        },
-        sockets:{
-            connect:function(){
-                console.log('socket 连接成功');
-            },
-            news:function(res){
-                console.log(res)
-                let type = res.type;
-                let data  =res.data;
-                if(type=='msg'){
-                    this.$notify({
-                        title: '提示',
-                        message: data,
-                        duration: 2000
-                    });
-
-                }else if(type=='success'){
-                    this.$http.get(`/api/p/${this.id}`)
-                            .then((res) => {
-                                this.doc = res.body;
-
-                            })
-                }
-
-            }
         },
         filters: {
             capitalize: function (value) {
