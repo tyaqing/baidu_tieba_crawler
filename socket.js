@@ -52,7 +52,6 @@ io.on('connection', function (socket) {
                 socket.worker.kill();
                 socket.emit('success', '爬取结束');
             }
-
         });
         socket.worker.on("close", function (code, signal) {
             console.log('close');
