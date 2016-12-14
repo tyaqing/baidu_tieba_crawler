@@ -42,16 +42,17 @@ io.on('connection', function (socket) {
         socket.worker.on("message", function (data) {
             // {type: 'msg', data: 'close'}
             console.log('cp message : ', data);
-            if (data.type == "now_num") {
+            if(data.type=='msg'){
+                socket.emit('info', data.data);
+            }else if (data.type == "now_num") {
                 socket.emit('now_num', data.data);
-            }
-            if (data.type == "total") {
+            }else if (data.type == "total") {
                 socket.emit('total', data.data);
-            }
-            if (data.data == 'close') {
+            }else if (data.data == 'close') {
                 socket.worker.kill();
                 socket.emit('success', '爬取结束');
             }
+
         });
         socket.worker.on("close", function (code, signal) {
             console.log('close');
