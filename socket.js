@@ -13,9 +13,10 @@ let io         = require('socket.io')(server);
 let api        = require('./server/api');
 let port = 8081;
 
-api(app);
-app.use(bodyParser.json());
+
 server.listen(port);
+app.use(bodyParser.json());
+api(app);
 
 // 统计子进程 用于限制子进程个数 避免宕机 worker_max 最大进程数
 // TODO  需要在进程生成的时候完成累加，进程结束时累减
