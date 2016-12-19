@@ -26,9 +26,13 @@ https://github.com/tyaqing/baidu_tieba_crawler
 ```
 ##真·调试
 ```
-node socket.js //运行restful api 和socket服务
-cd fe && npm run dev   //运行调试模式
+npm i          //安装后端依赖
+node socket.js //运行restful api 和socket服务 默认端口8081
+cd fe          //进入前端目录
+npm i          //安装前端依赖
+npm run dev    //运行调试模式  默认端口8080
 ```
+*@Molunerfinn 谢谢建议*
 ##关于技术栈
 用到的东西挺多的，但是都是用了点皮毛知识,提前踩坑。
 ####前端的
