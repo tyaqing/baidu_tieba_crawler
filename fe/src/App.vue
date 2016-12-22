@@ -5,7 +5,6 @@
 </template>
 
 <script>
-
     export default {
     name:'Menu',
         methods:{
@@ -13,8 +12,6 @@
         console.log(key, keyPath);
       }}
     }
-
-
 </script>
 
 <style lang="less">

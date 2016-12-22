@@ -1,17 +1,29 @@
 <template>
     <div class="ui container text mt-20">
         <el-card>
-            <div slot="header">
-                {{doc.title}}
+
+            <div slot="header" class="clearfix">
+                <span style="line-height: 36px;">{{doc.title}}</span>
+                <br><br>
+                <el-breadcrumb separator="/">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <el-breadcrumb-item :to="{ path: '/index/f?kw='+this.$route.query.kw }">{{kw}}吧</el-breadcrumb-item>
+                    <el-breadcrumb-item>{{doc.title}}</el-breadcrumb-item>
+                </el-breadcrumb>
+
             </div>
+
+
+
+
             <div class="postlist">
                 <el-button @click="getContent">获取/更新帖子内容</el-button>
                 <br><br>
-                <div class="f-12" v-for="(item,index) in doc.postlist">
+                <div class="f-16" v-for="(item,index) in doc.postlist">
                     {{item.user_name}}<br>
                     <!--<img v-for="img in item.img" :src="img">-->
 
-                    <p class="f-12">{{item.content}}</p>
+                    <p class="f-16">{{item.content}}</p>
 
                     <!--{{item.comment}}-->
 
@@ -52,11 +64,11 @@
         },
         data(){
             return {
+                kw:this.$route.query.kw,
                 id : this.$route.params.id,
                 doc: {},
             }
         },
-        components: {},
         methods   : {
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);

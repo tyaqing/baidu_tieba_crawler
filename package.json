@@ -1,13 +1,18 @@
 {
   "name": "baidu_tieba_crawler",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "baidu_tieba",
   "main": "socket.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/tyaqing/baidu_tieba_crawler"
   },
-  "contributors":[{"name":"ArH","email":"626019610@qq.com"}],
+  "contributors": [
+    {
+      "name": "ArH",
+      "email": "626019610@qq.com"
+    }
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,9 +24,11 @@
     "eventproxy": "^0.3.5",
     "express": "^4.14.0",
     "fs": "0.0.1-security",
+    "iconv": "^2.2.1",
     "jquery": "^3.1.1",
     "mongoose": "^4.6.6",
     "socket.io": "^1.5.1",
-    "superagent": "^2.2.0"
+    "superagent": "^2.2.0",
+    "superagent-charset": "^1.1.1"
   }
 }

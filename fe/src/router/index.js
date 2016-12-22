@@ -10,10 +10,19 @@ export default{
                 {path: '', component: lazyLoading('index/index')},
                 {path: 'dashboard', component: lazyLoading('index/dashboard')},
                 {path:'f',component:lazyLoading('index/f')},
-                {path:'p/:id',name:'p',component:lazyLoading('index/p')}
+                {path:'p/:id',name:'p',component:lazyLoading('index/p')},
+                {path:'listMember',component:lazyLoading('index/listMember')}
             ]
 
+            // this.$socket.emit('close',this.kw);
 
+
+        },
+        {
+            path:'/analysis',component:require('components/layout'),
+            children:[
+                {path:'',component: lazyLoading('analysis/index')},
+            ]
         },
         {path: '*', component: lazyLoading('public/error404')}
     ]

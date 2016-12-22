@@ -3,63 +3,60 @@
         <el-card>
 
             <div slot="header" class="clearfix">
-
-                <span style="line-height: 36px;">{{kw.toUpperCase()}}吧</span>
+                <span style="line-height: 36px;">{{kw.toUpperCase()}}吧-会员列表</span>
                 <br><br>
                 <el-breadcrumb separator="/">
                     <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                    <el-breadcrumb-item>{{kw.toUpperCase()}}吧</el-breadcrumb-item>
+                    <el-breadcrumb-item :to="{ path: '/index/f?kw='+this.$route.query.kw }">{{kw.toUpperCase()}}吧</el-breadcrumb-item>
+                    <el-breadcrumb-item>会员列表</el-breadcrumb-item>
                 </el-breadcrumb>
+
             </div>
             <el-button @click="start">开始爬取</el-button>
             <el-button @click="close">停止爬取</el-button>
-            <router-link class="right"  :to="{ path: '/index/listMember', query: { kw: this.$route.query.kw }}">
-                <el-button type="primary" >会员列表</el-button>
-            </router-link>
-            <br><br>
-            <el-card v-show="process_start">
-                <el-row>
-                    <div class="f-16 c-2">爬取进度</div>
-                    <el-col :span="24">
-                        <el-progress :text-inside="false" :stroke-width="10" :percentage="process"></el-progress>
 
+            <br><br>
+            <el-card v-show="1||process_start">
+                <el-row>
+                    <div class="f-16 c-2">爬取进度 : <el-tag type="success">{{tip}}</el-tag></div>
+                    <el-col :span="24">
                     </el-col>
                 </el-row>
             </el-card>
-            <br><br>
-            <el-table
-                    :data="tableData"
-                    stripe
-                    style="width: 100%">
-                <el-table-column
-                        prop="title"
-                        label="帖子"
-                        >
-                </el-table-column>
-                <el-table-column
-                        prop="user_name"
-                        width="150"
-                        label="发帖人"
-                        >
-                </el-table-column>
-                <el-table-column
-                        inline-template
-                        :context="_self"
-                        label="操作"
-                        width="70"
-                        >
-                      <span>
-                       <router-link target="_blank" :to="{path:'p/:id',name:'p',params:{id:row._id},query: { kw:kw}}"> <el-button type="text" size="small">详情</el-button></router-link>
-                      </span>
-                </el-table-column>
-            </el-table>
+            <br>
+
+
+            <el-row  :gutter="20">
+                <el-col class="user-card" v-for="item in tableData" :span="8">
+                    <img width="50" height="50"  :src="item.portrait">
+                    <div class="user-info">
+                        <div>
+                            <span class="f-14 c-3">{{item.name}}</span>
+                        </div>
+                        <div>
+                            <el-tag v-if="item.sex == 'male'" type="primary">男</el-tag>
+                            <el-tag v-else type="danger">女</el-tag>
+                            <el-tag v-if="item.vip_level != 0" type="warning">VIP:Lv{{item.vip_level}}</el-tag>
+                            <el-tag v-if="item.tieba_list[0].bazhu&&item.tieba_list[0].bazhu!=''" type="success">{{item.tieba_list[0].bazhu}}</el-tag>
+                        </div>
+                        <div class="c-4">
+                            <span class="f-12 ">吧龄 {{item.user_age}}</span>
+                            <span class="f-12 ">发帖数 {{item.post_total}}</span>
+                        </div>
+
+                    </div>
+
+                </el-col>
+
+            </el-row>
+
 
             <div class="block t-center mt-20">
                 <el-pagination
                         @size-change="handleSizeChange"
                         @current-change="handleCurrentChange"
                         :current-page="1"
-                        :page-sizes="[30, 50, 100, 200]"
+                        :page-sizes="[24, 50, 100, 200]"
                         :page-size="page_size"
                         layout="total, sizes, prev, pager, next, jumper"
                         :total="count">
@@ -70,13 +67,24 @@
     </div>
 
 </template>
-<style>
-
+<style lang="less">
+    .user-card{
+        height: 100px;
+        box-shadow:0 0 1px #ccc;
+        img{
+            float: left;
+            border-radius: 100%;
+            margin: 10px 0 0 0;
+        }
+        .user-info{
+            margin-left: 60px;
+        }
+    }
 </style>
 <script type="javascript">
     export default{
         mounted:function(){
-            this.$http.get(`/api/p?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
+            this.$http.get(`/api/user?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
                     .then(function(res){
                         this.tableData = res.body.data;
                         this.count = res.body.count;
@@ -86,21 +94,21 @@
             return {
                 kw:this.$route.query.kw,
                 tableData: [],
-                limit:50,
+                limit:24,
                 skip:0,
                 count:0,
-                page_size:50,
+                page_size:24,
                 current_page:1,
                 msg:'',
                 process:0,
                 process_total:0,
-                process_start:false
+                process_start:false,
+                tip:'无'
             }
         },
-        components: {},
         beforeRouteLeave (to, from, next) {
             // 判断是否正在爬取
-            if(!this.process_start||this.process==100){
+            if(!this.process_start){
                 next();
                 return;
             }
@@ -125,7 +133,7 @@
                 this.limit = val;
                 this.page_size = val;
                 this.skip = this.page_size * (this.current_page-1);
-                this.$http.get(`/api/p?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
+                this.$http.get(`/api/user?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
                         .then(function(res){
                             this.tableData = res.body.data;
                             this.count = res.body.count;
@@ -136,7 +144,7 @@
                 this.current_page = val;
                 this.limit = this.page_size;
                 this.skip = this.page_size * (val-1);
-                this.$http.get(`/api/p?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
+                this.$http.get(`/api/user?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
                         .then(function(res){
                             this.tableData = res.body.data;
                             this.count = res.body.count;
@@ -144,34 +152,32 @@
             },
             start(){
                 // 爬贴内内容
-                this.process_start = true;
+                this.process_start=true;
                 console.log(this.kw)
-                this.$socket.emit('get_tieba_list',this.kw);
+                this.$socket.emit('get_member_list',this.kw);
             },
             close(){
-                this.process_start = false;
+                this.process_start=false;
                 this.$socket.emit('close',this.kw);
-                this.$http.get(`/api/p?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
+                this.$http.get(`/api/user?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
                         .then(function(res){
                             this.tableData = res.body.data;
                             this.count = res.body.count;
                         })
             },
             listMemberInfo(){
-                location.href="/index/listMember";
+                location.href="";
             }
 
         },
         sockets:{
-            now_num: function (data) {
+            user_process: function (data) {
+                if(data=='close'){
+                    this.process_start=false;
+                }
+                this.tip=`发现用户 ${data.name} 等级 ${data.level} `;
                 console.log(data);
-                if (data == 0) return;
-                this.process = parseInt(data / this.process_total * 100);
             },
-            total  : function (data) {
-                console.log(data);
-                this.process_total = parseInt(data);
-            }
         }
     }
 

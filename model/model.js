@@ -38,21 +38,22 @@ let PostSchema = new Schema({
     last_update: {type: Date, default: Date.now}
 
 });
-
+//TODO  这应该是大家最关心的
 let UserSchema = new Schema({
     _id        : String,
     user_id    : String,
     is_verify  : Array,
+    vip_day    : Number,
+    vip_level  : Number,
     is_official: Array,
-    nickname   : String,
-    user_name  : String,
+    name       : String,
+    user_age   : Number,
+    post_total : Number,
     portrait   : String,
-    user_sex   : Number,
+    sex        : String,
     open_type  : String,
-    tieba      : Object,
+    tieba_list : Array,
     last_update: {type: Date, default: Date.now()}
-
-
 });
 
 exports.Post  = mongoose.model('Post', PostSchema);
