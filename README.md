@@ -1,11 +1,14 @@
 # baidu_tieba_crawler
 ##[演示地址](http://www.femirror.com/index)
 服务器很慢，请原谅
-##1.1更新说明
-* 依托socket实现一页面一进程
-* 改写入口文件，精简代码，提高了爬虫效率
-* 消灭了停止爬取会出现崩溃的bug
-
+##1.2更新说明
+* 可以爬用户了
+* 爬取过程中路由将被拦截
+* 增加了两个监控，socket连接数 子进程数
+##更迭期望
+* 数据分析 
+* 任务队列，实现无需驻足网页爬取，而是后台爬取
+* 代码优化 部分重写
 ##项目地址
 https://github.com/tyaqing/baidu_tieba_crawler
 喜欢的给个star
@@ -42,3 +45,7 @@ express socket.io superagent cheerio mongoose
 ####数据库
 mongo
 
+##1.1历史更新
+* 依托socket实现一页面一进程
+* 改写入口文件，精简代码，提高了爬虫效率
+* 消灭了停止爬取会出现崩溃的bug
