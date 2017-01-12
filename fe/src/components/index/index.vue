@@ -53,8 +53,8 @@
         mounted: function () {
             this.$http.get('/api/tieba')
                     .then(function (res) {
-                        console.log(res.body)
-                        this.card = res.body.reverse();
+                        // console.log(res.body)
+                        this.card = res.body;
                     }, function (res) {
                         // console.log(res)
                     })
@@ -85,10 +85,7 @@
                         })
             }
         },
-
-
     }
-
 </script>
 
 <style lang="less" scoped>

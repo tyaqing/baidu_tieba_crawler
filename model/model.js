@@ -16,15 +16,32 @@ db.once('open', function (callback) {
 
 
 let TiebaSchema = new Schema({
-    _id       : {type: String, unique: true},
-    kw        : {type: String, unique: true},
-    page_sum  : Number,
-    follow_sum: Number,
-    topic_sum : Number,
-    post_sum  : Number,
-    head_img  : String
+    _id                      : {type: String, unique: true},
+    kw                       : {type: String, unique: true},
+    page_sum                 : Number,
+    follow_sum               : Number,
+    topic_sum                : Number,
+    post_sum                 : Number,
+    head_img                 : String,
+    creat_time               : {type: Date, default: Date.now()},
+    // tieba_list_lock          : {type: Boolean, default: false},
+    // tieba_list_enqueue_time  : Date,
+    // tieba_list_outqueue_time : Date,
+    // member_list_lock         : {type: Boolean, default: false},
+    // member_list_enqueue_time : Date,
+    // member_list_outqueue_time: Date,
 });
 
+let QueueSchema = new Schema({
+    kw            : {type: String, unique: true},
+    type          : String,
+    lock          : {type: Boolean, default: false},
+    creat_time    : {type: Date, default: Date.now()},
+    out_time      : Date,
+    count         : Number,
+    active_count  : Number,
+    complete_count: Number
+});
 
 let PostSchema = new Schema({
     _id        : {type: String, unique: true},
@@ -35,7 +52,7 @@ let PostSchema = new Schema({
     title      : String,
     href       : String,
     postlist   : Array,
-    last_update: {type: Date, default: Date.now}
+    last_update: {type: Date, default: Date.now()}
 
 });
 //TODO  这应该是大家最关心的
@@ -59,3 +76,4 @@ let UserSchema = new Schema({
 exports.Post  = mongoose.model('Post', PostSchema);
 exports.User  = mongoose.model('User', UserSchema);
 exports.Tieba = mongoose.model('Tieba', TiebaSchema);
+exports.Queue = mongoose.model('Queue', QueueSchema);

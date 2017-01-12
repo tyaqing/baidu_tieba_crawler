@@ -16,23 +16,46 @@
 
             <el-row :gutter="20">
                 <el-col :span="18">
-                    <transition  name="fade">
-                        <router-view >
+                    <transition name="fade">
+                        <router-view>
 
                         </router-view>
                     </transition>
                 </el-col>
                 <el-col class="mt-20" :span="6">
                     <el-card>
-                        正在执行的进程
-                        {{worker_sum.worker_sum}}
-                        链接数量
-                        {{worker_sum.connectCounter}}
+                        <div slot="header" class="clearfix">
+                            <h2>正在队列中的贴吧</h2>
+                        </div>
+
+                        <br>
+                        <div v-for="item in queue">
+                           <h3  class="h3"> {{item.kw}}</h3>
+                            <span>{{item.page_sum}}</span> <a>操作</a>
+                            <el-progress :text-inside="true" :stroke-width="18" :percentage="0"></el-progress>
+                        </div>
+
+                        <el-button @click="queue_clear" type="danger">清空队列</el-button>
+                    </el-card>
+                    <el-card class="mt-10">
+                        <div slot="header">
+                            <h2>队列处理进程</h2>
+                        </div>
+                        <br>
+                        <div v-for="item in queue">
+                            <h3  class="h3"> {{item.kw}}</h3>
+                            <span>{{item.page_sum}}</span>
+                            <el-progress :text-inside="true" :stroke-width="18" :percentage="0"></el-progress>
+                        </div>
+                        <br>
+                        <h2 class="pd-6">队列处理进程</h2>
+                        <el-button>创建一个处理进程</el-button>
+
+
                     </el-card>
                 </el-col>
             </el-row>
         </div>
-
 
 
     </div>
@@ -40,15 +63,39 @@
 
 <script type="javascript">
     export default {
-    data(){
-        return{
-            worker_sum:{},
-        }
-    },
+        mounted: function () {
+            this.$http.get('/api/queue/status')
+                    .then(function (res) {
+                        this.queue = res.body;
+                    })
+        },
+        data(){
+            return {
+                worker_sum: {},
+                queue:[]
+            }
+        },
         name   : 'Hello',
         methods: {
             handleSelect(key, keyPath) {
                 console.log(key, keyPath);
+            },
+            queue_clear(){
+                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功!'
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                })
             }
         },
         // 总socket监听器 仅用于消息通讯
@@ -58,23 +105,23 @@
             },
             success: function (data) {
                 this.$notify({
-                    title: '成功',
+                    title  : '成功',
                     message: data,
-                    type: 'success'
+                    type   : 'success'
                 });
             },
             warning: function (data) {
                 this.$notify({
-                    title: '警告',
+                    title  : '警告',
                     message: data,
-                    type: 'warning'
+                    type   : 'warning'
                 });
             },
             error  : function (data) {
                 this.$notify({
-                    title: '错误',
+                    title  : '错误',
                     message: data,
-                    type: 'error'
+                    type   : 'error'
                 });
             },
             info   : function (data) {
@@ -85,11 +132,6 @@
                     type    : 'info'
                 });
             },
-            //正在运行进程的个数
-            worker_sum:function(data){
-                this.worker_sum = data;
-                console.log(data);
-            }
         }
     }
 </script>
@@ -102,10 +144,12 @@
             text-decoration: none;
         }
     }
+
     .menu {
         background-color: #324055;
     }
-    .monit{
+
+    .monit {
         background-color: #ccc;
         /*width: 150px;*/
         /*position: fixed;*/

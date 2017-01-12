@@ -12,8 +12,7 @@
                 </el-breadcrumb>
 
             </div>
-            <el-button @click="start">开始爬取</el-button>
-            <el-button @click="close">停止爬取</el-button>
+            <el-button @click="start">创建爬取任务</el-button>
 
             <br><br>
             <el-card v-show="1||process_start">
@@ -152,18 +151,13 @@
             },
             start(){
                 // 爬贴内内容
-                this.process_start=true;
-                console.log(this.kw)
-                this.$socket.emit('get_member_list',this.kw);
-            },
-            close(){
-                this.process_start=false;
-                this.$socket.emit('close',this.kw);
-                this.$http.get(`/api/user?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
+                this.$http.get(`/api/queue/get_member_list?kw=${this.kw}`)
                         .then(function(res){
-                            this.tableData = res.body.data;
-                            this.count = res.body.count;
-                        })
+                            this.$message({
+                                type:Object.keys(res.body)[0],
+                                message:Object.values(res.body)[0],
+                            });
+                        });
             },
             listMemberInfo(){
                 location.href="";
