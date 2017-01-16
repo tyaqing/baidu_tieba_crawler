@@ -30,7 +30,7 @@
 
                         <br>
                         <div v-for="item in queue">
-                           <h3  class="h3"> {{item.kw}}</h3>
+                            <h3 class="h3"> {{item.kw}}</h3>
                             <span>{{item.page_sum}}</span> <a>操作</a>
                             <el-progress :text-inside="true" :stroke-width="18" :percentage="0"></el-progress>
                         </div>
@@ -43,13 +43,13 @@
                         </div>
                         <br>
                         <div v-for="item in queue">
-                            <h3  class="h3"> {{item.kw}}</h3>
+                            <h3 class="h3"> {{item.kw}}</h3>
                             <span>{{item.page_sum}}</span>
                             <el-progress :text-inside="true" :stroke-width="18" :percentage="0"></el-progress>
                         </div>
                         <br>
                         <h2 class="pd-6">队列处理进程</h2>
-                        <el-button>创建一个处理进程</el-button>
+                        <el-button @click="create_process" type="primary">创建一个处理进程</el-button>
 
 
                     </el-card>
@@ -72,7 +72,7 @@
         data(){
             return {
                 worker_sum: {},
-                queue:[]
+                queue     : []
             }
         },
         name   : 'Hello',
@@ -83,19 +83,31 @@
             queue_clear(){
                 this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
                     confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
+                    cancelButtonText : '取消',
+                    type             : 'warning'
                 }).then(() => {
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功!'
-                    });
+                    this.$http.get('/api/queue/clean')
+                            .then(function (res) {
+                                this.$message({
+                                    type   : Object.keys(res.body)[0],
+                                    message: Object.values(res.body)[0],
+                                });
+                            });
                 }).catch(() => {
                     this.$message({
-                        type: 'info',
+                        type   : 'info',
                         message: '已取消删除'
                     });
                 })
+            },
+            create_process(){
+                this.$http.get('/api/queue/manage?type=start_queue')
+                        .then(function(res){
+                            this.$message({
+                                type   : Object.keys(res.body)[0],
+                                message: Object.values(res.body)[0],
+                            });
+                        })
             }
         },
         // 总socket监听器 仅用于消息通讯

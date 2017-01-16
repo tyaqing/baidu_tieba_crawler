@@ -15,7 +15,7 @@
 
             <el-form :model="form" label-width="80px">
                 <el-form-item label="贴吧名称">
-                    <el-input @keyup.enter="onSubmit" v-model="form.name"> </el-input>
+                    <el-input @keyup.enter="onSubmit" v-model="form.name"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="onSubmit">立即创建</el-button>
@@ -34,7 +34,7 @@
                         <div class="c-green f-16 mt-10"><i class="el-icon-delete"> </i>关注 : {{item.follow_sum}}</div>
                         <div class="c-green f-16 mt-10"><i class="el-icon-delete"> </i>帖子 : {{item.post_sum}}</div>
                         <br>
-                        <router-link  :to="{ path: 'index/f', query: { kw: item.kw }}">
+                        <router-link :to="{ path: 'index/f', query: { kw: item.kw }}">
                             <el-button class="mt-10">查看详情</el-button>
                         </router-link>
                     </article>
@@ -73,13 +73,17 @@
         },
         methods: {
             onSubmit() {
-                if(this.form.name==''){
+                if (this.form.name == '') {
                     this.$message('没有关键字');
                     return;
                 }
                 this.loading = true;
                 this.$http.post('/api/tieba', {kw: this.form.name})
                         .then((res) => {
+                    if(res.body.error){
+                        this.loading = false;
+                        return this.$message(res.body.error);
+                    }
                             this.card.unshift(res.body)
                             this.loading = false;
                         })

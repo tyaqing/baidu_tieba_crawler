@@ -1,14 +1,13 @@
 /**
  * Created by ArH on 2016/12/1.
  */
-let db       = require('../model/model');
-let kue      = require('kue')
-    , queue  = kue.createQueue();
-let cp       = require('child_process');
-let provides = require('./provides');
-let func     = require('./func');
+let db      = require('../model/model');
+let kue     = require('kue')
+    , queue = kue.createQueue();
+let cp      = require('child_process');
+let func    = require('./func');
 
-let worker_pool = [];
+let worker_list = [];
 
 kue.app.listen(3000);
 
@@ -163,6 +162,7 @@ module.exports = function (app) {
         }
         if (req.params.kw != '') {
             func.base_info(kw, function (data) {
+                if (data == null) return res.send({error: '找不到该贴吧'});
                 db.Tieba.findOneAndUpdate({kw: `${kw}`}, data, function (err, docs) {
                     if (docs == null) db.Tieba.create(data);
                 });
@@ -175,74 +175,24 @@ module.exports = function (app) {
 
 
     // queue 接口
+
     // 获取贴吧列表
     app.get('/queue/get_tieba_list', function (req, res) {
         let kw = req.query.kw;
         if (!req.query.kw) res.send({err: 'kw null'});
-
         /*
-         首先 查找数据库
+         首先 查找队列 是否有正在爬取
+         删除 数组中对象
          */
-        db.Tieba.findOne({kw: kw}, function (err, doc) {
-            if (err) return console.log(err);
-            // 这里要判断是否正在爬取 类似锁一样
-            if (doc.crawler_lock == true) {
-                res.send({warning: '这个贴吧正在爬取队列中'});
-                return;
+        kue.Job.rangeByType('get_tieba_list_complete', 'inactive', 0, -1, 'asc', function (err, jobs) {
+            for (let i = 0; i < jobs.length; i++) {
+                if (jobs[i].data.kw == kw)  return res.send({warning: '这个贴吧会员正在爬取队列中'});
             }
-            //上锁
-            // doc.crawler_lock = true;
-            doc.update({$set: {member_list_lock: true, member_list_enqueue_time: Date.now()}}, function (err, doc) {
-                console.log(err, doc)
-            });
-            // 循环队列
-            for (let i = 0; i<doc.page_sum/50; i++) {
-                queue.create('get_tieba_list', {
-                    url: `http://tieba.baidu.com/f?kw=${encodeURI(kw)}&pn=${i * 50}`,
-                    kw : kw,
-                    _id: doc._id
-                }).save(function (err) {
-                    if (err) res.send({err: err});
-                });
-            }
-            // 完成后会执行解锁队列
-            queue.create('get_tieba_list_unlock', {
-                kw : kw,
-                _id: doc._id
-            }).save(function (err, info) {
-                if (err) res.send({err: err});
-            });
-            res.send({success: '创建队列成功'});
-
-        });
-    });
-
-    // 获取用户列表
-    app.get('/queue/get_member_list',function(req,res){
-        let kw = req.query.kw;
-        if (!req.query.kw) res.send({err: 'kw null'});
-
-
-
-        /*
-         首先 查找数据库
-         */
-        db.Tieba.findOne({kw: kw}, function (err, doc) {
-            if (err) return console.log(err);
-            // 这里要判断是否正在爬取 类似锁一样
-            if (doc.get_member_list_lock == true) {
-                res.send({warning: '这个贴吧会员正在爬取队列中'});
-                return;
-            }
-            //上锁
-            // doc.crawler_lock = true;
-            doc.update({$set: {get_member_list_lock: true, en_queue_time: Date.now()}}, function (err, doc) {
-                console.log(err, doc)
-            });
-            // 获取GBK 关键字
-            func.gbk_encode(kw,function(gbk_kw){
-                // 循环入队
-                for (let i = 0; i<doc.page_sum/50; i++) {
+            // 找不到就创建一个队列记录
+            db.Tieba.findOne({kw: kw}, function (err, doc) {
+                //循环队列
+                let page_sum = doc.page_sum == 0 ? 0 : doc.page_sum / 50;
+                for (let i = 0; i <= page_sum; i++) {
                     queue.create('get_tieba_list', {
                         url: `http://tieba.baidu.com/f?kw=${encodeURI(kw)}&pn=${i * 50}`,
                         kw : kw,
@@ -251,8 +201,9 @@ module.exports = function (app) {
                         if (err) res.send({err: err});
                     });
                 }
+
                 // 完成后会执行解锁队列
-                queue.create('get_tieba_list_unlock', {
+                queue.create('get_tieba_list_complete', {
                     kw : kw,
                     _id: doc._id
                 }).save(function (err, info) {
@@ -263,31 +214,93 @@ module.exports = function (app) {
         });
     });
 
+    // 获取用户列表
+    app.get('/queue/get_member_list', function (req, res) {
+        let kw = req.query.kw;
+        if (!req.query.kw) res.send({err: 'kw null'});
 
-    /*
-        处理进程
-     */
-    //运行处理队列子进程
-    app.get('/queue/manage', function (req, res) {
-        if (req.query.type == 'start_queue') {
-            let worker = cp.fork('./server/queue/index.js');
-            worker_pool.push(worker);
-        }
-        res.send({err: 'value null'});
+        kue.Job.rangeByType('get_member_list_complete', 'inactive', 0, -1, 'asc', function (err, jobs) {
+            for (let i = 0; i < jobs.length; i++) {
+                if (jobs[i].data.kw == kw)  return res.send({warning: '这个贴吧会员正在爬取队列中'});
+            }
+            // 找不到就创建一个队列记录
+            db.Tieba.findOne({kw: kw}, function (err, doc) {
+                //循环队列
+                func.gbk_encode(kw, function (gbk_kw) {
+                    // 循环入队
+                    let page_sum = doc.follow_sum < 24 ? 1 : (doc.follow_sum / 24) + 1;
+                    for (let i = 1; i <= page_sum; i++) {
+                        queue.create('get_member_list', {
+                            url  : `http://tieba.baidu.com/bawu2/platform/listMemberInfo?word=${gbk_kw}&pn=${i}`,
+                            kw   : kw,
+                            _id  : doc._id,
+                            tieba: doc
+                        }).save(function (err) {
+                            if (err) res.send({err: err});
+                        });
+                    }
+                    // 完成后会执行解锁队列
+                    queue.create('get_member_list_complete', {
+                        kw : kw,
+                        _id: doc._id
+                    }).save(function (err, info) {
+                        if (err) res.send({err: err});
+                    });
+                    res.send({success: '创建队列成功'});
+                });
+
+            });
+        });
     });
 
+
     // app.get('/queue/test',provides('content'));
-    app.get('/queue/status',function(req,res){
-        db.Tieba.find({crawler_lock:true},function(err,tiebas){
+    app.get('/queue/status', function (req, res) {
+        db.Tieba.find({crawler_lock: true}, function (err, tiebas) {
             res.send(tiebas);
         });
     });
 
 
+    //queue 学习promise
 
-    //queue 查询
+    app.get('/queue/clean', function (req, res) {
+        kue.Job.rangeByState('inactive', 0, -1, 'asc', function (err, jobs) {
+            jobs.forEach(function (job) {
+                job.remove(function () {
+                    console.log('removed ', job.id);
+                    kue.Job.rangeByState('active', 0, -1, 'asc', function (err, jobs) {
+                        jobs.forEach(function (job) {
+                            job.remove(function () {
+                                console.log('removed ', job.id);
+                                res.send({success: '已清除所有队列'});
+                            });
+                        });
 
-    api.get('/queue/')
+                    });
+                });
+            });
+        });
+    });
+
+
+    /*
+     处理进程
+     */
+    //运行处理队列子进程
+    app.get('/queue/manage', function (req, res) {
+        if (req.query.type == 'start_queue') {
+            let worker = cp.fork('./server/queue/index.js');
+            worker_list.push(worker);
+            return res.send({success: '创建进程成功'});
+        }
+        return res.send({error: 'value null'});
+    });
+    // 进程状态
+    app.get('/cp/stats',function(req,res){
+        console.log()
+
+    });
 
 
 };
@@ -326,10 +339,3 @@ kue.Job.rangeByState('active', 0, -1, 'asc', function (err, jobs) {
     console.log(jobs.length);
 });
 
-// kue.Job.rangeByState( 'complete', 0, n, 'asc', function( err, jobs ) {
-//     jobs.forEach( function( job ) {
-//         job.remove( function(){
-//             console.log( 'removed ', job.id );
-//         });
-//     });
-// });
