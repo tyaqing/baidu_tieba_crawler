@@ -12,10 +12,6 @@
                 </el-breadcrumb>
 
             </div>
-
-
-
-
             <div class="postlist">
                 <el-button @click="getContent">获取/更新帖子内容</el-button>
                 <br><br>
@@ -28,7 +24,7 @@
                     <!--{{item.comment}}-->
 
                     <ul v-if="item.comment">
-                        <li v-for="comment in item.comment.comment_info" >
+                        <li v-for="comment in item.comment.comment_info">
                             {{comment.username}}
 
                             <div v-html="comment.content"></div>
@@ -41,14 +37,14 @@
     </div>
 </template>
 <style lang="less">
-    .postlist{
-        p{
+    .postlist {
+        p {
             padding: .6rem;
         }
-        p:nth-child(odd){
-            background-color:#F3F3F3;
+        p:nth-child(odd) {
+            background-color: #F3F3F3;
         }
-        p:nth-child(even){
+        p:nth-child(even) {
             background-color: #D8F4FD;
         }
     }
@@ -56,20 +52,17 @@
 </style>
 <script type="javascript">
     export default{
-        mounted   : function () {
-            this.$http.get(`/api/p/${this.id}`)
-                    .then((res) => {
-                        this.doc = res.body;
-                    })
+        mounted: function () {
+            this.refresh_data();
         },
         data(){
             return {
-                kw:this.$route.query.kw,
+                kw : this.$route.query.kw,
                 id : this.$route.params.id,
                 doc: {},
             }
         },
-        methods   : {
+        methods: {
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
             },
@@ -77,10 +70,23 @@
                 console.log(`当前页: ${val}`);
             },
             getContent(){
-                this.$socket.emit('get_tieba_content', this.id);
+                this.$message('正在抓取,请稍等');
+                this.$http.get(`/api/get_tieba_content?pid=${this.id}`)
+                        .then((res) => {
+                            this.$message({
+                                type   : Object.keys(res.body)[0],
+                                message: Object.values(res.body)[0],
+                            });
+                            this.refresh_data();
+
+                        })
             },
-            showattip(){},
-            hideattip(){},
+            refresh_data(){
+                this.$http.get(`/api/p/${this.id}`)
+                        .then((res) => {
+                            this.doc = res.body;
+                        })
+            }
         },
         filters: {
             capitalize: function (value) {
@@ -88,15 +94,6 @@
                 if (!value) return ''
                 value = value.toString()
                 return value.charAt(0).toUpperCase() + value.slice(1)
-            }
-        },
-        sockets:{
-            get_content:function(data){
-                console.log(data);
-                this.$http.get(`/api/p/${this.id}`)
-                        .then((res) => {
-                            this.doc = res.body;
-                        })
             }
         },
     }

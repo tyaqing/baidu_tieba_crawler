@@ -33,7 +33,7 @@ https://github.com/tyaqing/baidu_tieba_crawler
 ##真·调试
 ```
 npm i          //安装后端依赖
-node socket.js //运行restful api 和socket服务 默认端口8081
+node server.js //运行restful api 和socket服务 默认端口8081
 cd fe          //进入前端目录
 npm i          //安装前端依赖
 npm run dev    //运行调试模式  默认端口8080
