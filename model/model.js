@@ -2,14 +2,13 @@ let mongoose = require('mongoose');
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://127.0.0.1/test/');
-//
 // mongoose.set('debug', true)
 
 let ObjectId = mongoose.Types.ObjectId;
 
 Schema = mongoose.Schema;
 let db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'))
+db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function (callback) {
     console.log('---mongodb 链接成功---');
 });
@@ -22,9 +21,9 @@ let TiebaSchema = new Schema({
     follow_sum: Number,
     topic_sum : Number,
     post_sum  : Number,
-    head_img  : String
+    head_img  : String,
+    creat_time: {type: Date, default: Date.now()},
 });
-
 
 let PostSchema = new Schema({
     _id        : {type: String, unique: true},
@@ -35,10 +34,10 @@ let PostSchema = new Schema({
     title      : String,
     href       : String,
     postlist   : Array,
-    last_update: {type: Date, default: Date.now}
+    last_update: {type: Date, default: Date.now()}
 
 });
-//TODO  这应该是大家最关心的
+
 let UserSchema = new Schema({
     _id        : String,
     user_id    : String,

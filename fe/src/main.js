@@ -20,3 +20,6 @@ new Vue({
     router,
     ...App
 }).$mount('#app');
+
+
+//这里是1.3 正在作业中！

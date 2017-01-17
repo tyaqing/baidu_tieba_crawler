@@ -11,21 +11,20 @@
                     <el-breadcrumb-item>{{kw.toUpperCase()}}吧</el-breadcrumb-item>
                 </el-breadcrumb>
             </div>
-            <el-button @click="start">开始爬取</el-button>
-            <el-button @click="close">停止爬取</el-button>
+            <el-button type="disable" @click="start">加入任务队列</el-button>
             <router-link class="right"  :to="{ path: '/index/listMember', query: { kw: this.$route.query.kw }}">
                 <el-button type="primary" >会员列表</el-button>
             </router-link>
             <br><br>
-            <el-card v-show="process_start">
-                <el-row>
-                    <div class="f-16 c-2">爬取进度</div>
-                    <el-col :span="24">
-                        <el-progress :text-inside="false" :stroke-width="10" :percentage="process"></el-progress>
+            <!--<el-card>-->
+                <!--<el-row>-->
+                    <!--<div class="f-16 c-2">队列进度</div>-->
+                    <!--<el-col :span="24">-->
+                        <!--<el-progress :text-inside="false" :stroke-width="10" :percentage="process"></el-progress>-->
 
-                    </el-col>
-                </el-row>
-            </el-card>
+                    <!--</el-col>-->
+                <!--</el-row>-->
+            <!--</el-card>-->
             <br><br>
             <el-table
                     :data="tableData"
@@ -76,11 +75,7 @@
 <script type="javascript">
     export default{
         mounted:function(){
-            this.$http.get(`/api/p?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
-                    .then(function(res){
-                        this.tableData = res.body.data;
-                        this.count = res.body.count;
-                    })
+            this.dataRefresh();
         },
         data(){
             return {
@@ -97,7 +92,6 @@
                 process_start:false
             }
         },
-        components: {},
         beforeRouteLeave (to, from, next) {
             // 判断是否正在爬取
             if(!this.process_start||this.process==100){
@@ -125,17 +119,16 @@
                 this.limit = val;
                 this.page_size = val;
                 this.skip = this.page_size * (this.current_page-1);
-                this.$http.get(`/api/p?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
-                        .then(function(res){
-                            this.tableData = res.body.data;
-                            this.count = res.body.count;
-                        })
+                this.dataRefresh();
             },
             handleCurrentChange(val) {
                 console.log(`当前页: ${val}`);
                 this.current_page = val;
                 this.limit = this.page_size;
                 this.skip = this.page_size * (val-1);
+                this.dataRefresh();
+            },
+            dataRefresh(){
                 this.$http.get(`/api/p?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
                         .then(function(res){
                             this.tableData = res.body.data;
@@ -143,36 +136,30 @@
                         })
             },
             start(){
-                // 爬贴内内容
-                this.process_start = true;
-                console.log(this.kw)
-                this.$socket.emit('get_tieba_list',this.kw);
-            },
-            close(){
-                this.process_start = false;
-                this.$socket.emit('close',this.kw);
-                this.$http.get(`/api/p?limit=${this.limit}&skip=${this.skip}&kw=${this.kw}`)
+                this.$http.get(`/api/queue/get_tieba_list?kw=${this.kw}`)
                         .then(function(res){
-                            this.tableData = res.body.data;
-                            this.count = res.body.count;
-                        })
+                            this.$message({
+                                type:Object.keys(res.body)[0],
+                                message:Object.values(res.body)[0],
+                            });
+                        });
             },
             listMemberInfo(){
                 location.href="/index/listMember";
             }
 
         },
-        sockets:{
-            now_num: function (data) {
-                console.log(data);
-                if (data == 0) return;
-                this.process = parseInt(data / this.process_total * 100);
-            },
-            total  : function (data) {
-                console.log(data);
-                this.process_total = parseInt(data);
-            }
-        }
+        // sockets:{
+        //     now_num: function (data) {
+        //         console.log(data);
+        //         if (data == 0) return;
+        //         this.process = parseInt(data / this.process_total * 100);
+        //     },
+        //     total  : function (data) {
+        //         console.log(data);
+        //         this.process_total = parseInt(data);
+        //     }
+        // }
     }
 
 </script>
