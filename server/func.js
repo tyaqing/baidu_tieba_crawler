@@ -37,7 +37,7 @@ exports.get_tieba_list = function (job, cb) {
                 let user_id      = (JSON.parse(user_id_json)).user_id;
                 let href         = url.resolve(target_url, $element.find('a.j_th_tit').attr('href'));
                 let title        = $element.find('a.j_th_tit').text();
-                let post_id      = ((new RegExp(/\d{6,10}/)).exec(href))[0];
+                let post_id      = ((new RegExp(/\d{4,10}/)).exec(href))[0];
                 topicUrls.push({
                     _id      : post_id,
                     href     : href,

@@ -22,6 +22,9 @@ app.use(bodyParser.json());
 api(app);
 
 
+
+
+
 let socket_count = 0, one_intervel;
 io.on('connection', function (socket) {
     socket_count++;
