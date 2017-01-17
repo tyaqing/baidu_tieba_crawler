@@ -12,7 +12,7 @@ let io         = require('socket.io')(server);
 let api        = require('./server/api');
 let stats      = require('./server/queue/stats');
 
-
+//release
 
 //可配置项
 let port = 8081;
@@ -20,6 +20,9 @@ let port = 8081;
 server.listen(port);
 app.use(bodyParser.json());
 api(app);
+
+
+
 
 
 let socket_count = 0, one_intervel;

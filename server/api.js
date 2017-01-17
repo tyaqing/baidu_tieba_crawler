@@ -283,12 +283,14 @@ module.exports = function (app) {
     //queue 清除所有队列
     app.get('/queue/clean', function (req, res) {
         kue.Job.rangeByState('inactive', 0, -1, 'asc', function (err, jobs) {
+            if(jobs.length>0) return res.send({success: '当前队列正在进行,无法清除'});
             jobs.forEach(function (job) {
                 job.remove(function () {
                     console.log('removed ', job.id);
                 });
             });
             kue.Job.rangeByState('active', 0, -1, 'asc', function (err, jobs) {
+                if(jobs.length>0) return res.send({success: '当前队列正在进行,无法清除'});
                 jobs.forEach(function (job) {
                     job.remove(function () {
                         console.log('removed ', job.id);
@@ -337,3 +339,19 @@ module.exports = function (app) {
 
 
 };
+
+// 每次重启都需要清理下队列
+kue.Job.rangeByState('inactive', 0, -1, 'asc', function (err, jobs) {
+    jobs.forEach(function (job) {
+        job.remove(function () {
+            console.log('removed ', job.id);
+        });
+    });
+    kue.Job.rangeByState('active', 0, -1, 'asc', function (err, jobs) {
+        jobs.forEach(function (job) {
+            job.remove(function () {
+                console.log('removed ', job.id);
+            });
+        });
+    });
+});

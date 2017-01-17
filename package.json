@@ -1,6 +1,6 @@
 {
   "name": "baidu_tieba_crawler",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "baidu_tieba",
   "main": "server.js",
   "repository": {
