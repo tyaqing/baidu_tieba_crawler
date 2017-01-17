@@ -28,7 +28,7 @@
             <el-row  :gutter="20">
                 <el-col class="user-card" v-for="item in tableData" :span="8">
                     <img width="50" height="50"  :src="item.portrait">
-                    <div class="user-info">
+                    <div class="user-info mt-10">
                         <div>
                             <span class="f-14 c-3">{{item.name}}</span>
                         </div>
