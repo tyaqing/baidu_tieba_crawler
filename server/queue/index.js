@@ -14,6 +14,14 @@ process.on('message', (m) => {
 
 // 爬帖子列表
 queue.process('get_tieba_list', function(job, done){
+    // 是否为结束通知
+    if(job.data.type&&job.data.type=='complete'){
+        // global.global_stats
+        // console.log(global.global_stats.tieba);
+        process.send({close:true});
+        // global.global_stats.tieba.shift();
+        return done();
+    }
      func.get_tieba_list(job.data,function(data){
          db.Post.create(data, function (err, res) {
              if (err) return done();

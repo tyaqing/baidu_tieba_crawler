@@ -12,7 +12,9 @@ global.worker       = {
     limit  : 4,// 限制进程个数
     cp_list: [] // 进程列表
 };
-global.global_stats = {}; // 广播出去的队列状态 放入全局 避免重复查询
+global.global_stats = {
+    tieba: []
+}; // 广播出去的队列状态 放入全局 避免重复查询
 
 // kue.app.listen(3000);
 
@@ -63,7 +65,6 @@ module.exports = function (app) {
 
     });
     //获取单个帖子内容
-    //TODO
     app.get('/p/:id', function (req, res) {
         let id = req.params.id;
         if (id == null) {
@@ -189,34 +190,38 @@ module.exports = function (app) {
          首先 查找队列 是否有正在爬取
          删除 数组中对象
          */
-        kue.Job.rangeByType('get_tieba_list_complete', 'inactive', 0, -1, 'asc', function (err, jobs) {
-            for (let i = 0; i < jobs.length; i++) {
-                if (jobs[i].data.kw == kw)  return res.send({warning: '这个贴吧会员正在爬取队列中'});
-            }
-            // 找不到就创建一个队列记录
-            db.Tieba.findOne({kw: kw}, function (err, doc) {
-                //循环队列
-                let page_sum = doc.page_sum == 0 ? 0 : doc.page_sum / 50;
-                for (let i = 0; i <= page_sum; i++) {
-                    queue.create('get_tieba_list', {
-                        url: `http://tieba.baidu.com/f?kw=${encodeURI(kw)}&pn=${i * 50}`,
-                        kw : kw,
-                        _id: doc._id
-                    }).save(function (err) {
-                        if (err) res.send({err: err});
-                    });
-                }
 
-                // 完成后会执行解锁队列
-                queue.create('get_tieba_list_complete', {
+        for (let i = 0; i < global.global_stats.tieba.length; i++) {
+            if (global.global_stats.tieba[i].kw == kw)  return res.send({warning: '这个贴吧会员正在爬取队列中'});
+        }
+        // 找不到就创建一个队列记录
+        db.Tieba.findOne({kw: kw}, function (err, doc) {
+            //循环队列
+            let page_sum = doc.page_sum == 0 ? 0 : doc.page_sum / 50;
+            for (let i = 0; i <= page_sum; i++) {
+                queue.create('get_tieba_list', {
+                    url: `http://tieba.baidu.com/f?kw=${encodeURI(kw)}&pn=${i * 50}`,
                     kw : kw,
                     _id: doc._id
-                }).save(function (err, info) {
+                }).save(function (err) {
                     if (err) res.send({err: err});
                 });
-                res.send({success: '创建队列成功'});
+            }
+            // 存进全局函数
+
+            global.global_stats['tieba'].push(doc);
+            // console.log(global.global_stats);
+            // 完成后会执行解锁队列
+            queue.create('get_tieba_list', {
+                type: 'complete',
+                kw  : kw,
+                _id : doc._id
+            }).save(function (err, info) {
+                if (err) res.send({err: err});
             });
+            res.send({success: '创建队列成功'});
         });
+
     });
 
     // 获取用户列表
@@ -259,7 +264,7 @@ module.exports = function (app) {
     });
 
 
-    // app.get('/queue/test',provides('content'));
+    // 暂时没有 app.get('/queue/test',provides('content'));
     app.get('/queue/status', function (req, res) {
         kue.Job.rangeByType('get_tieba_list_complete', 'inactive', 0, -1, 'asc', function (err, jobs) {
             let resp = [];
@@ -275,8 +280,7 @@ module.exports = function (app) {
     });
 
 
-    //queue 学习promise
-
+    //queue 清除所有队列
     app.get('/queue/clean', function (req, res) {
         kue.Job.rangeByState('inactive', 0, -1, 'asc', function (err, jobs) {
             jobs.forEach(function (job) {
@@ -290,6 +294,7 @@ module.exports = function (app) {
                         console.log('removed ', job.id);
                     });
                 });
+                global_stats.tieba=[];
                 res.send({success: '已清除所有队列'});
             });
         });
@@ -306,6 +311,11 @@ module.exports = function (app) {
                 return res.send({warning: `不能创建了,最大限制是${worker.limit}个进程`});
             }
             let cp_item = cp.fork('./server/queue/index.js');
+            // 接受子进程消息关闭
+            cp_item.on('message',function(message){
+                console.log(message);
+                global.global_stats.tieba.shift();
+            });
             worker.cp_list.push(cp_item);
             return res.send({success: '创建进程成功'});
         } else if (req.query.type == 'delete_process') {
@@ -323,11 +333,6 @@ module.exports = function (app) {
         } else {
             return res.send({error: 'value null'});
         }
-    });
-    // 进程状态
-    app.get('/cp/stats', function (req, res) {
-        console.log(worker_list.length);
-        res.send({sum: worker_list.length});
     });
 
 

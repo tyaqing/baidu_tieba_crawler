@@ -2,7 +2,6 @@
  * Created by ArH on 2016/11/12.
  */
 
-let cp      = require('child_process');
 let express = require('express');
 let app     = express();
 
@@ -20,6 +19,7 @@ let port = 8081;
 server.listen(port);
 app.use(bodyParser.json());
 api(app);
+
 
 let socket_count = 0, one_intervel;
 io.on('connection', function (socket) {

@@ -16,15 +16,15 @@
                 <el-button type="primary" >会员列表</el-button>
             </router-link>
             <br><br>
-            <el-card>
-                <el-row>
-                    <div class="f-16 c-2">队列进度</div>
-                    <el-col :span="24">
-                        <el-progress :text-inside="false" :stroke-width="10" :percentage="process"></el-progress>
+            <!--<el-card>-->
+                <!--<el-row>-->
+                    <!--<div class="f-16 c-2">队列进度</div>-->
+                    <!--<el-col :span="24">-->
+                        <!--<el-progress :text-inside="false" :stroke-width="10" :percentage="process"></el-progress>-->
 
-                    </el-col>
-                </el-row>
-            </el-card>
+                    <!--</el-col>-->
+                <!--</el-row>-->
+            <!--</el-card>-->
             <br><br>
             <el-table
                     :data="tableData"

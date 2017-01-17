@@ -8,6 +8,7 @@ let kue     = require('kue')
     , queue = kue.createQueue();
 
 module.exports = function(cb){
+
     // 获得基本信息
     get(queue)
     ('inactiveCount')
@@ -17,22 +18,17 @@ module.exports = function(cb){
     ('delayedCount')
     ('workTime')
     (function( err, obj ) {
-        kue.Job.rangeByType('get_tieba_list_complete', 'inactive', 0, -1, 'desc', function (err, jobs) {
-            let resp = [];
-            for(let i =0;i<jobs.length;i++){
-                resp.unshift({
-                    kw:jobs[i].data.kw,
-                });
-            }
-
-            obj.queue = resp;
-            obj.cp = {
+        queue.inactiveCount( 'get_member_info', function( err, total ) {
+            // 获取爬取用户信息的队列数量
+            global.global_stats.cp = {
                 sum:worker.cp_list.length,
                 limit:worker.limit
             };
             // console.log(jobs);
-            global.global_stats = obj;
+            global.global_stats.count = obj;
+            global.global_stats.count.user = total;
         });
+
 
     });
 //     queue.inactiveCount( function( err, total ) { // others are activeCount, completeCount, failedCount, delayedCount

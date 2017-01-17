@@ -31,30 +31,37 @@
                             <el-row class="t-center stats" :gutter="20">
                                 <el-col :span="12">
                                     <div>当前任务</div>
-                                    <el-tag>{{stats.inactiveCount}}</el-tag>
+                                    <el-tag>{{stats.count.inactiveCount}}</el-tag>
                                 </el-col>
                                 <el-col :span="12">
                                     <div>进行的任务</div>
-                                    <el-tag type="primary">{{stats.activeCount}}</el-tag>
+                                    <el-tag type="primary">{{stats.count.activeCount}}</el-tag>
                                 </el-col>
 
                                 <el-col :span="12">
                                     <div>完成任务</div>
-                                    <el-tag type="success">{{stats.completeCount}}</el-tag>
+                                    <el-tag type="success">{{stats.count.completeCount}}</el-tag>
                                 </el-col>
                                 <el-col :span="12">
                                     <div>失败任务</div>
-                                    <el-tag type="danger">{{stats.failedCount}}</el-tag>
+                                    <el-tag type="danger">{{stats.count.failedCount}}</el-tag>
+
+                                </el-col>
+                                <el-col :span="12">
+                                    <div>爬用户任务</div>
+                                    <el-tag type="primary">{{stats.count.user}}</el-tag>
+
+                                </el-col>
+                                <el-col :span="12">
+                                    <div>工作时间</div>
+                                    <el-tag type="primary">{{parseInt(stats.count.workTime/1000/60)}}m</el-tag>
 
                                 </el-col>
                             </el-row>
                         </el-card>
-                        <el-card class="queue-card" v-for="(item, index) in stats.queue">
-                            <el-badge v-if="index==0" value="ing" class="item">
-                                <h3 class="h3"> {{item.kw}} &nbsp;&nbsp;</h3>
-                            </el-badge>
-                            <h3 v-else class="h3"> {{item.kw}} </h3>
-                            <span>{{item.page_sum}}</span>
+                        <el-card class="queue-card" v-for="(item, index) in stats.tieba">
+                            <span  class="h3"> {{item.kw}} </span>
+                            <span>总页数{{item.page_sum}}</span>
                         </el-card>
                         <br>
 
@@ -92,7 +99,8 @@
                     cp:{
                         sum:0,
                         limit:0
-                    }
+                    },
+                    count:{}
                 },
                 cp_sum :0,
             }
