@@ -54,7 +54,8 @@ queue.process('get_member_list', function(job, done){
                 name:member_list[i].name,
                 tieba:tieba
             }).save(function (err) {
-                if (err) res.send({err: err});
+                if (err) console.log(err);
+                done(new Error(err));
             });
         }
         done();

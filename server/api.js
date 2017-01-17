@@ -9,7 +9,7 @@ let func    = require('./func');
 
 // 全局变量
 global.worker       = {
-    limit  : 4,// 限制进程个数
+    limit  : 1,// 限制进程个数
     cp_list: [] // 进程列表
 };
 global.global_stats = {
@@ -283,20 +283,20 @@ module.exports = function (app) {
     //queue 清除所有队列
     app.get('/queue/clean', function (req, res) {
         kue.Job.rangeByState('inactive', 0, -1, 'asc', function (err, jobs) {
-            if(jobs.length>0) return res.send({success: '当前队列正在进行,无法清除'});
+            if (jobs.length > 0) return res.send({success: '当前队列正在进行,无法清除'});
             jobs.forEach(function (job) {
                 job.remove(function () {
                     console.log('removed ', job.id);
                 });
             });
             kue.Job.rangeByState('active', 0, -1, 'asc', function (err, jobs) {
-                if(jobs.length>0) return res.send({success: '当前队列正在进行,无法清除'});
+                if (jobs.length > 0) return res.send({success: '当前队列正在进行,无法清除'});
                 jobs.forEach(function (job) {
                     job.remove(function () {
                         console.log('removed ', job.id);
                     });
                 });
-                global_stats.tieba=[];
+                global_stats.tieba = [];
                 res.send({success: '已清除所有队列'});
             });
         });
@@ -314,7 +314,7 @@ module.exports = function (app) {
             }
             let cp_item = cp.fork('./server/queue/index.js');
             // 接受子进程消息关闭
-            cp_item.on('message',function(message){
+            cp_item.on('message', function (message) {
                 console.log(message);
                 global.global_stats.tieba.shift();
             });
@@ -337,21 +337,28 @@ module.exports = function (app) {
         }
     });
 
+    // 每次重启都需要清理下队列
 
-};
-
-// 每次重启都需要清理下队列
-kue.Job.rangeByState('inactive', 0, -1, 'asc', function (err, jobs) {
-    jobs.forEach(function (job) {
-        job.remove(function () {
-            console.log('removed ', job.id);
+    kue.Job.rangeByState('inactive', 0, -1, 'asc', function (err, jobs) {
+        jobs.forEach(function (job) {
+            job.remove(function () {
+                // console.log('removed ', job.id);
+            });
         });
     });
     kue.Job.rangeByState('active', 0, -1, 'asc', function (err, jobs) {
         jobs.forEach(function (job) {
             job.remove(function () {
-                console.log('removed ', job.id);
+                // console.log('removed ', job.id);
             });
         });
     });
-});
+    kue.Job.rangeByState('complete', 0, -1, 'asc', function (err, jobs) {
+        jobs.forEach(function (job) {
+            job.remove(function () {
+                // console.log('removed ', job.id);
+            });
+        });
+    });
+};
+

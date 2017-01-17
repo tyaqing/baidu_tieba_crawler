@@ -20,7 +20,7 @@ exports.get_tieba_list = function (job, cb) {
         .end(function (err, res) {
             if (err) {
                 console.log('爬取失败重试');
-                exports.get_tieba_list(target_url);
+                exports.get_tieba_list(job,cb);
                 return;
             }
             let topicUrls = [];
@@ -37,7 +37,8 @@ exports.get_tieba_list = function (job, cb) {
                 let user_id      = (JSON.parse(user_id_json)).user_id;
                 let href         = url.resolve(target_url, $element.find('a.j_th_tit').attr('href'));
                 let title        = $element.find('a.j_th_tit').text();
-                let post_id      = ((new RegExp(/\d{4,10}/)).exec(href))[0];
+                // console.log(`fetch ${href}`);
+                let post_id = ((new RegExp(/\d{4,11}/)).exec(href))[0];
                 topicUrls.push({
                     _id      : post_id,
                     href     : href,
