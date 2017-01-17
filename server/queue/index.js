@@ -16,7 +16,7 @@ process.on('message', (m) => {
 queue.process('get_tieba_list', function(job, done){
      func.get_tieba_list(job.data,function(data){
          db.Post.create(data, function (err, res) {
-             if (err) return console.log(err);
+             if (err) return done();
              console.log(job.id + ' compelet');
              done();
          })

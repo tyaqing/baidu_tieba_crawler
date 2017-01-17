@@ -15,13 +15,13 @@
             <el-button @click="start">创建爬取任务</el-button>
 
             <br><br>
-            <el-card v-show="1||process_start">
-                <el-row>
-                    <div class="f-16 c-2">爬取进度 : <el-tag type="success">{{tip}}</el-tag></div>
-                    <el-col :span="24">
-                    </el-col>
-                </el-row>
-            </el-card>
+            <!--<el-card v-show="1||process_start">-->
+                <!--<el-row>-->
+                    <!--<div class="f-16 c-2">爬取进度 : <el-tag type="success">{{tip}}</el-tag></div>-->
+                    <!--<el-col :span="24">-->
+                    <!--</el-col>-->
+                <!--</el-row>-->
+            <!--</el-card>-->
             <br>
 
 

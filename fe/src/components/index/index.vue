@@ -22,7 +22,6 @@
                 </el-form-item>
             </el-form>
 
-            <small style="font-size:16px">服务器太渣，各位请移步本地调试，目前存在一些bug正在研究当中</small>
         </el-card>
 
         <el-row :gutter="20">

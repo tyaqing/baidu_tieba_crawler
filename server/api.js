@@ -7,9 +7,14 @@ let kue     = require('kue')
 let cp      = require('child_process');
 let func    = require('./func');
 
-let worker_list = [];
+// 全局变量
+global.worker       = {
+    limit  : 4,// 限制进程个数
+    cp_list: [] // 进程列表
+};
+global.global_stats = {}; // 广播出去的队列状态 放入全局 避免重复查询
 
-kue.app.listen(3000);
+// kue.app.listen(3000);
 
 module.exports = function (app) {
 
@@ -256,9 +261,17 @@ module.exports = function (app) {
 
     // app.get('/queue/test',provides('content'));
     app.get('/queue/status', function (req, res) {
-        db.Tieba.find({crawler_lock: true}, function (err, tiebas) {
-            res.send(tiebas);
+        kue.Job.rangeByType('get_tieba_list_complete', 'inactive', 0, -1, 'asc', function (err, jobs) {
+            let resp = [];
+            for (let i = 0; i < jobs.length; i++) {
+                resp.unshift({
+                    kw: jobs[i].data.kw,
+                });
+            }
+            // console.log(jobs);
+            res.send(resp);
         });
+
     });
 
 
@@ -269,16 +282,15 @@ module.exports = function (app) {
             jobs.forEach(function (job) {
                 job.remove(function () {
                     console.log('removed ', job.id);
-                    kue.Job.rangeByState('active', 0, -1, 'asc', function (err, jobs) {
-                        jobs.forEach(function (job) {
-                            job.remove(function () {
-                                console.log('removed ', job.id);
-                                res.send({success: '已清除所有队列'});
-                            });
-                        });
-
+                });
+            });
+            kue.Job.rangeByState('active', 0, -1, 'asc', function (err, jobs) {
+                jobs.forEach(function (job) {
+                    job.remove(function () {
+                        console.log('removed ', job.id);
                     });
                 });
+                res.send({success: '已清除所有队列'});
             });
         });
     });
@@ -289,53 +301,34 @@ module.exports = function (app) {
      */
     //运行处理队列子进程
     app.get('/queue/manage', function (req, res) {
-        if (req.query.type == 'start_queue') {
-            let worker = cp.fork('./server/queue/index.js');
-            worker_list.push(worker);
+        if (req.query.type == 'create_process') {
+            if (worker.cp_list.length >= worker.limit) {
+                return res.send({warning: `不能创建了,最大限制是${worker.limit}个进程`});
+            }
+            let cp_item = cp.fork('./server/queue/index.js');
+            worker.cp_list.push(cp_item);
             return res.send({success: '创建进程成功'});
+        } else if (req.query.type == 'delete_process') {
+            if (worker.cp_list.length == 0) {
+                return res.send({warning: '没有可删除的进程'});
+            }
+            // 查询是否有任务
+            if (global_stats.inactiveCount != 0) {
+                return res.send({warning: '当前有任务正在进行,进程不可删除'});
+            } else {
+                worker.cp_list[0].kill();
+                worker.cp_list.pop();
+                return res.send({success: '删除进程成功'});
+            }
+        } else {
+            return res.send({error: 'value null'});
         }
-        return res.send({error: 'value null'});
     });
     // 进程状态
-    app.get('/cp/stats',function(req,res){
-        console.log()
-
+    app.get('/cp/stats', function (req, res) {
+        console.log(worker_list.length);
+        res.send({sum: worker_list.length});
     });
 
 
 };
-
-console.log(typeof queue);
-queue.on('job enqueue', function (id, type) {
-    console.log('Job %s got queued of type %s', id, type);
-});
-
-// queue.inactive( function( err, ids ) { // others are active, complete, failed, delayed
-//     console.log(ids);
-// });
-
-// queue.active( function( err, ids ) {
-//     ids.forEach( function( id ) {
-//         kue.Job.get( id, function( err, job ) {
-//             // Your application should check if job is a stuck one
-//             job.inactive();
-//         });
-//     });
-// });
-
-// queue.inactiveCount( function( err, total ) { // others are activeCount, completeCount, failedCount, delayedCount
-//    console.log(total);
-// });
-// queue.completeCount( function( err, total ) { // others are activeCount, completeCount, failedCount, delayedCount
-//     console.log(total);
-// });
-
-kue.Job.rangeByType('get_tieba_list', 'active', 0, -1, 'asc', function (err, jobs) {
-    // console.log(jobs);
-});
-
-kue.Job.rangeByState('active', 0, -1, 'asc', function (err, jobs) {
-    // you have an array of maximum n Job objects here
-    console.log(jobs.length);
-});
-

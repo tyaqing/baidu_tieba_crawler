@@ -27,29 +27,51 @@
                         <div slot="header" class="clearfix">
                             <h2>正在队列中的贴吧</h2>
                         </div>
+                        <el-card>
+                            <el-row class="t-center stats" :gutter="20">
+                                <el-col :span="12">
+                                    <div>当前任务</div>
+                                    <el-tag>{{stats.inactiveCount}}</el-tag>
+                                </el-col>
+                                <el-col :span="12">
+                                    <div>进行的任务</div>
+                                    <el-tag type="primary">{{stats.activeCount}}</el-tag>
+                                </el-col>
 
+                                <el-col :span="12">
+                                    <div>完成任务</div>
+                                    <el-tag type="success">{{stats.completeCount}}</el-tag>
+                                </el-col>
+                                <el-col :span="12">
+                                    <div>失败任务</div>
+                                    <el-tag type="danger">{{stats.failedCount}}</el-tag>
+
+                                </el-col>
+                            </el-row>
+                        </el-card>
+                        <el-card class="queue-card" v-for="(item, index) in stats.queue">
+                            <el-badge v-if="index==0" value="ing" class="item">
+                                <h3 class="h3"> {{item.kw}} &nbsp;&nbsp;</h3>
+                            </el-badge>
+                            <h3 v-else class="h3"> {{item.kw}} </h3>
+                            <span>{{item.page_sum}}</span>
+                        </el-card>
                         <br>
-                        <div v-for="item in queue">
-                            <h3 class="h3"> {{item.kw}}</h3>
-                            <span>{{item.page_sum}}</span> <a>操作</a>
-                            <el-progress :text-inside="true" :stroke-width="18" :percentage="0"></el-progress>
-                        </div>
 
                         <el-button @click="queue_clear" type="danger">清空队列</el-button>
                     </el-card>
                     <el-card class="mt-10">
-                        <div slot="header">
-                            <h2>队列处理进程</h2>
-                        </div>
-                        <br>
-                        <div v-for="item in queue">
-                            <h3 class="h3"> {{item.kw}}</h3>
-                            <span>{{item.page_sum}}</span>
-                            <el-progress :text-inside="true" :stroke-width="18" :percentage="0"></el-progress>
-                        </div>
-                        <br>
-                        <h2 class="pd-6">队列处理进程</h2>
-                        <el-button @click="create_process" type="primary">创建一个处理进程</el-button>
+
+                            <div slot="header">
+                                <el-tooltip class="item" effect="dark" content="进程创建越多，队列处理越快" placement="left-start">
+                                    <h2>队列处理进程</h2>
+                                </el-tooltip>
+                            </div>
+                        当前进程数 {{0||stats.cp.sum}} 最大进程数 {{0||stats.cp.limit}}
+                        <br><br>
+                        <el-button @click="create_process" type="primary">创建进程</el-button>
+                        <el-button @click="delete_process" type="danger">删除进程</el-button>
+
 
 
                     </el-card>
@@ -63,16 +85,16 @@
 
 <script type="javascript">
     export default {
-        mounted: function () {
-            this.$http.get('/api/queue/status')
-                    .then(function (res) {
-                        this.queue = res.body;
-                    })
-        },
         data(){
             return {
                 worker_sum: {},
-                queue     : []
+                stats     : {
+                    cp:{
+                        sum:0,
+                        limit:0
+                    }
+                },
+                cp_sum :0,
             }
         },
         name   : 'Hello',
@@ -81,7 +103,7 @@
                 console.log(key, keyPath);
             },
             queue_clear(){
-                this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+                this.$confirm('此操作将清空所有队列, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText : '取消',
                     type             : 'warning'
@@ -101,13 +123,33 @@
                 })
             },
             create_process(){
-                this.$http.get('/api/queue/manage?type=start_queue')
+                this.$http.get('/api/queue/manage?type=create_process')
                         .then(function(res){
                             this.$message({
                                 type   : Object.keys(res.body)[0],
                                 message: Object.values(res.body)[0],
                             });
                         })
+            },
+            delete_process(){
+                this.$confirm('没有任务的时候可以删除进程, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText : '取消',
+                    type             : 'warning'
+                }).then(() => {
+                    this.$http.get('/api/queue/manage?type=delete_process')
+                            .then(function(res){
+                                this.$message({
+                                    type   : Object.keys(res.body)[0],
+                                    message: Object.values(res.body)[0],
+                                });
+                            })
+                }).catch(() => {
+                    this.$message({
+                        type   : 'info',
+                        message: '已取消删除'
+                    });
+                })
             }
         },
         // 总socket监听器 仅用于消息通讯
@@ -115,35 +157,10 @@
             connect: function (data) {
                 console.log('socket链接成功');
             },
-            success: function (data) {
-                this.$notify({
-                    title  : '成功',
-                    message: data,
-                    type   : 'success'
-                });
+            stats: function (data) {
+               this.stats = data;
             },
-            warning: function (data) {
-                this.$notify({
-                    title  : '警告',
-                    message: data,
-                    type   : 'warning'
-                });
-            },
-            error  : function (data) {
-                this.$notify({
-                    title  : '错误',
-                    message: data,
-                    type   : 'error'
-                });
-            },
-            info   : function (data) {
-                this.$notify({
-                    title   : '提示',
-                    message : data,
-                    duration: 2000,
-                    type    : 'info'
-                });
-            },
+
         }
     }
 </script>
@@ -168,4 +185,16 @@
         /*left: 20px;*/
         /*top: 80px;*/
     }
+    .stats{
+        .el-col{
+            margin: 10px 0 ;
+        }
+    }
+    .queue-card{
+        margin: 5px 0;
+    }
+    .el-tag{
+        margin-top: 5px;
+    }
+
 </style>
